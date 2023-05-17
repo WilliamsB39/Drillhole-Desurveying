@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-Survey = np.genfromtxt('#File#.csv', delimiter = ',', skip_header=2, usecols=(0,1,2))
+Survey = np.genfromtxt('#File#.csv', delimiter = ',', skip_header=2, usecols=(0,1,2)) #Import drillhole survey data file
 
 Dn =  #Input distance of interest here
 
@@ -20,10 +20,10 @@ PlungeDegrees  = Survey[:, 2] #Call Plunge data
 DepthDn = np.append(Depth[Depth < Dn], Dn)    #This step takes only Depth values < Dn value, adding Dn to the list
 
 DepthDiffs = np.diff(DepthDn) #Distance along drillhole between survey points
-AzimuthRadians = np.radians(AzimuthDegrees) #Convert degrees to radians
-PlungeRadians = np.radians(PlungeDegrees) #Convert degrees to radians
+AzimuthRadians = np.radians(AzimuthDegrees) #Convert Azimuth degrees to radians
+PlungeRadians = np.radians(PlungeDegrees) #Convert Plunge degrees to radians
 
-ListLength = (np.prod(Depth.shape) - np.prod(DepthDiffs.shape))*-1   #Difference between the total length intervals in all drillhole and distances up to point of interest
+ListLength = (np.prod(Depth.shape) - np.prod(DepthDiffs.shape))*-1   #Difference between the total length intervals in all drillhole and distances up to Dn point of interest
 
 Az1 = AzimuthRadians[:ListLength] #Azimuth at first survey in each survey point pair - not used in basic tangent method
 P1  = PlungeRadians[:ListLength] #Plunge at first survey in each survey point pair - not used in basic tangent method
@@ -49,12 +49,14 @@ SumDepth = np.insert(SumDepth, 0, 0.0) #Adds the drillhole collar depth
 SumNorth = np.insert(SumNorth, 0, 0.0) #Adds the drillhole collar northing
 SumEast  = np.insert(SumEast,  0, 0.0) #Adds the drillhole collar easting
 
+    #Print statements of Dn location
 print('Depth at point:', SumDepth[-1])
 print('North at point:', SumNorth[-1])
 print('East at point:', SumEast[-1])
 print('Azimuth at Dn Depth:', np.degrees(Az2)[-1])
 print('Plunge at Dn Depth:', np.degrees(P2)[-1])
 
+    #Plot 3D graph
 ax = plt.axes(projection='3d')
 
 ax.scatter3D(SumEast, SumNorth, SumDepth, color='blue')

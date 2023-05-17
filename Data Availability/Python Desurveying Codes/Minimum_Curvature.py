@@ -9,41 +9,47 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-Survey = np.genfromtxt('#File#.csv', delimiter = ',', skip_header=2, usecols=(0,1,2))
+#Survey = np.genfromtxt('#File#.csv', delimiter = ',', skip_header=2, usecols=(0,1,2)) #Import drillhole survey data file
+#
+#Dn = #Input distance of interest here
 
-Dn = #
+Survey = np.genfromtxt('C:\\Users\\C1840358\\OneDrive - Cardiff University\\Documents\\PhD\\YEAR 1\\MIM Fieldwork (2019)\\Downhole Desurveying\\Data Availability\\Test_Survey.csv', delimiter = ',', skip_header=2, usecols=(0,1,2))
 
-Depth = Survey[:, 0]
-AzimuthDegrees = Survey[:, 1]
-PlungeDegrees  = Survey[:, 2]
+Dn = 120
 
-DepthDn = np.append(Depth[Depth < Dn], Dn)
+Depth = Survey[:, 0] #Call Depth data
+AzimuthDegrees = Survey[:, 1] #Call Azimuth data
+PlungeDegrees  = Survey[:, 2] #Call Plunge data
 
-DepthDiffs = np.diff(DepthDn)
-AzimuthRadians = np.radians(AzimuthDegrees)
-PlungeRadians = np.radians(PlungeDegrees)
+DepthDn = np.append(Depth[Depth < Dn], Dn)    #This step takes only Depth values < Dn value, adding Dn to the list
 
-ListLength = (len(Depth) - len(DepthDiffs)) * -1
+DepthDiffs = np.diff(DepthDn)  #Distance along drillhole between survey points
+AzimuthRadians = np.radians(AzimuthDegrees) #Convert Azimuth degrees to radians
+PlungeRadians = np.radians(PlungeDegrees) #Convert Plunge degrees to radians
 
-D1   = Depth[:ListLength]
-Az1  = AzimuthRadians[:ListLength]
-P1   = PlungeRadians[:ListLength]
-Az1D = AzimuthDegrees[:ListLength]
-P1D  = PlungeDegrees[:ListLength]
+ListLength = (len(Depth) - len(DepthDiffs)) * -1  #Difference between the total length intervals in all drillhole and distances up to Dn point of interest
 
+D1   = Depth[:ListLength] #Depth at first survey in each survey point pair - metres
+Az1  = AzimuthRadians[:ListLength] #Azimuth at first survey in each survey point pair - radians
+P1   = PlungeRadians[:ListLength] #Plunge at first survey in each survey point pair - radians
+Az1D = AzimuthDegrees[:ListLength] #Azimuth at first survey in each survey point pair - degrees
+P1D  = PlungeDegrees[:ListLength] #Plunge at first survey in each survey point pair - degrees
+
+    #If statement for if list = 0, i.e. Dn > penultimate survey point depth
 if ListLength + 1 < 0:
     ListLength = ListLength + 1
 else:
     ListLength = None
 
-D2   = Depth[1:ListLength]
-Az2  = AzimuthRadians[1:ListLength]
-P2   = PlungeRadians[1:ListLength]
-Az2D = AzimuthDegrees[1:ListLength]
-P2D  = PlungeDegrees[1:ListLength]
+D2   = Depth[1:ListLength] #Depth at second survey in each survey point pair - metres
+Az2  = AzimuthRadians[1:ListLength] #Azimuth at second survey in each survey point pair - radians
+P2   = PlungeRadians[1:ListLength] #Plunge at second survey in each survey point pair - radians
+Az2D = AzimuthDegrees[1:ListLength] #Azimuth at second survey in each survey point pair - degrees
+P2D  = PlungeDegrees[1:ListLength] #Plunge at second survey in each survey point pair - degrees
 
-MD = (D2 - D1)
+MD = (D2 - D1) #Downhole distances between successive survey points
 
+    #Calculate Azimuth and Plunge for Dn location
 if Dn <= (D1[-1] + (MD[-1]/2)):
     Azimuth = Az1D[-1]
     Plunge = P1D[-1]
@@ -51,11 +57,12 @@ else:
     Azimuth = Az2D[-1]
     Plunge = P2D[-1]
 
-ab = ((np.sin(Az1) * np.cos(P1)) * (np.sin(Az2) * np.cos(P2))) + ((np.cos(Az1) * np.cos(P1)) * (np.cos(Az2) * np.cos(P2))) + (np.sin(P1) * np.sin(P2))
-AB = np.sqrt(((np.sin(Az1) * np.cos(P1))**2) + ((np.cos(Az1) * np.cos(P1))**2) + ((np.sin(P1))**2)) * np.sqrt(((np.sin(Az2) * np.cos(P2))**2) + ((np.cos(Az2) * np.cos(P2))**2) + ((np.sin(P2))**2))
-Beta = np.arccos(ab/AB)
-RF = (np.tan(Beta/2)) / (Beta/2)
+ab = ((np.sin(Az1) * np.cos(P1)) * (np.sin(Az2) * np.cos(P2))) + ((np.cos(Az1) * np.cos(P1)) * (np.cos(Az2) * np.cos(P2))) + (np.sin(P1) * np.sin(P2))   #Calculate dot product of each survey point pair
+AB = np.sqrt(((np.sin(Az1) * np.cos(P1))**2) + ((np.cos(Az1) * np.cos(P1))**2) + ((np.sin(P1))**2)) * np.sqrt(((np.sin(Az2) * np.cos(P2))**2) + ((np.cos(Az2) * np.cos(P2))**2) + ((np.sin(P2))**2))   #Calculate the product of the vector lengths in each survey point pair
+Beta = np.arccos(ab/AB)   #Calculates the angle between the drillhole direction in each survey point pair
+RF = (np.tan(Beta/2)) / (Beta/2)   #Calculates the ratio factor to multiply the below
 
+    #Calculate relative depths, northings and eastings at Dn location
 if Dn <= D1[-1] + (MD[-1] / 2):
     Dp = (Dn - D1[-1]) * (np.sin(P1[-1])) * RF[-1]
     Np = (Dn - D1[-1]) * (np.cos(P1[-1]) * np.cos(Az1[-1])) * RF[-1]
@@ -65,6 +72,7 @@ else:
     Np = (((Dn - D1[-1] - (MD[-1]/2)) * np.cos(P2[-1]) * np.cos(Az2[-1])) + ((MD[-1]/2) * np.cos(P1[-1]) * np.cos(Az1[-1]))) * RF[-1]
     Ep = (((Dn - D1[-1] - (MD[-1]/2)) * np.cos(P2[-1]) * np.sin(Az2[-1])) + ((MD[-1]/2) * np.cos(P1[-1]) * np.sin(Az1[-1]))) * RF[-1]
     
+    #Calculate all depths, northings and eastings and multiply by ratio factor (RF), sum results cumulatively down the drillhole and append Dn data above
 Depth = (MD/2)*(np.sin(P1) + np.sin(P2))*RF
 North = (MD/2)*((np.cos(P1)*np.cos(Az1)) + (np.cos(P2)*np.cos(Az2)))*RF
 East  = (MD/2)*((np.cos(P1)*np.sin(Az1)) + (np.cos(P2)*np.sin(Az2)))*RF
@@ -77,6 +85,7 @@ SumDepth = np.insert(SumDepth, 0, 0.0)
 SumNorth = np.insert(SumNorth, 0, 0.0)
 SumEast  = np.insert(SumEast,  0, 0.0)
 
+    #Plot 3D graph
 print('Depth at point:', SumDepth[-1])
 print('North at point:', SumNorth[-1])
 print('East at point:',  SumEast[-1])
