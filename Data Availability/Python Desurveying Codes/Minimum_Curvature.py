@@ -9,13 +9,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-#Survey = np.genfromtxt('#File#.csv', delimiter = ',', skip_header=2, usecols=(0,1,2)) #Import drillhole survey data file
-#
-#Dn = #Input distance of interest here
+Survey = np.genfromtxt('#File#.csv', delimiter = ',', skip_header=2, usecols=(0,1,2)) #Import drillhole survey data file
 
-Survey = np.genfromtxt('C:\\Users\\C1840358\\OneDrive - Cardiff University\\Documents\\PhD\\YEAR 1\\MIM Fieldwork (2019)\\Downhole Desurveying\\Data Availability\\Test_Survey.csv', delimiter = ',', skip_header=2, usecols=(0,1,2))
-
-Dn = 120
+Dn = #Input distance of interest here
 
 Depth = Survey[:, 0] #Call Depth data
 AzimuthDegrees = Survey[:, 1] #Call Azimuth data
