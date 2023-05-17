@@ -5,7 +5,7 @@ Authors: Williams, B.J. and Blenkinsop, T.G.
 The codes presented here allow the user to plot drillhole pathways in Python or R using different desurveying methods (Basic Tangent, Balanced Tangent, Average Angle, Minimum Curvature) without sophisticated or commercial software. The code allows the azimuth, plunge and 3-dimensional coordinates to be calculated for any point along the drillhole. This enables the user to ascertain the orientation of drill core at any distance along the drillhole and locate points of interest, such as geological contacts, faults, or underground workings in 3-dimensional mine grid coordinates.
 
 These codes are available in both Python (.py) and R (.R) languages and can be found in the respective folders ‘Python Desurveying Codes’ and ‘R Desurveying Codes’:
-  o	Basic Tangent Method
+\\o	Basic Tangent Method
   o	Balanced Tangent Method
   o	Average Angle Method
   o	Minimum Curvature Method
