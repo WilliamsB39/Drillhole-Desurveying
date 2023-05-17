@@ -29,8 +29,16 @@ How to run codes:
   *	State depth of interest as the Dn variable
 
 Examples
-Python:
+Python:  
+![Average_Angle_Test_Survey_Python](https://github.com/WilliamsB39/Drillhole-Desurveying/assets/65358801/4d5cb867-8b58-4709-804f-5552882150a3)
+        Depth at point: 7.3228  
+        North at point: 21.8231  
+        East at point: 116.9278  
+        Azimuth at Dn Depth: 67.5  
+        Plunge at Dn Depth: 3.0  
+<pre>
 
-
-
-R:
+</pre>
+  
+R:  
+![Average_Angle_Test_Survey_R](https://github.com/WilliamsB39/Drillhole-Desurveying/assets/65358801/ae7583ae-178e-4d89-90ef-6b6ea8c2a0f1)
