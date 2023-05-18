@@ -3,33 +3,35 @@
 library(plot3D)
 library(plot3Drgl)
 
-Survey <- read.csv("#File#.csv", skip = 1, header = TRUE,)[,1:3]
+Survey <- read.csv("#File#.csv", skip = 1, header = TRUE,)[,1:3] #Import drillhole survey data file
 
-Dn <- #
+Dn <- #Input distance of interest here
 
-Depth <- Survey[,"Depth..m."]
-AzimuthDegrees <- Survey[,"Az.Deg"]
-PlungeDegrees <- Survey[,"P.Deg"]
+Depth <- Survey[,"Depth..m."] #Call Depth data
+AzimuthDegrees <- Survey[,"Az.Deg"] #Call Azimuth data
+PlungeDegrees <- Survey[,"P.Deg"] #Call Plunge data
 
-DepthDn <- append(Depth[Depth < Dn], Dn)
+DepthDn <- append(Depth[Depth < Dn], Dn) #This step takes only Depth values < Dn value, adding Dn to the list
 
-DepthDiffs <- diff(DepthDn)
-AzimuthRadians <- (AzimuthDegrees * pi/180)
-PlungeRadians <- (PlungeDegrees * pi/180)
+DepthDiffs <- diff(DepthDn)  #Distance along drillhole between survey points
+AzimuthRadians <- (AzimuthDegrees * pi/180)  #Convert Azimuth degrees to radians
+PlungeRadians <- (PlungeDegrees * pi/180)  #Convert Plunge degrees to radians
 
+    #Difference between the total length intervals in all drillhole and distances up to Dn point of interest
 ListLength <- (length(Depth) - length(DepthDiffs))
 L <- length(Depth) - ListLength
 
-D1 <- Depth[1:L]
-Az1 <- AzimuthRadians[1:L]
-P1 <- PlungeRadians[1:L]
+D1 <- Depth[1:L] #Depth at first survey in each survey point pair
+Az1 <- AzimuthRadians[1:L] #Azimuth at first survey in each survey point pair
+P1 <- PlungeRadians[1:L] #Plunge at first survey in each survey point pair
 
-D2 <- Depth[2:(L+1)]
-Az2 <- AzimuthRadians[2:(L+1)]
-P2 <- PlungeRadians[2:(L+1)]
+D2 <- Depth[2:(L+1)] #Depth at second survey in each survey point pair
+Az2 <- AzimuthRadians[2:(L+1)] #Azimuth at second survey in each survey point pair
+P2 <- PlungeRadians[2:(L+1)] #Plunge at second survey in each survey point pair
 
-MD <- (D2-D1)
+MD <- (D2-D1) #Downhole distances between successive survey points
 
+    #Calculate Azimuth and Plunge for Dn location
 if (Dn <= D1[L] + (MD[L]/2)) {
   Azimuth = (180/pi) * Az1[L]
   Plunge = (180/pi) * P1[L]
@@ -38,11 +40,12 @@ if (Dn <= D1[L] + (MD[L]/2)) {
   Plunge = (180/pi) * P2[L]
 }
 
-ab <- ((sin(Az1) * cos(P1)) * (sin(Az2) * cos(P2))) + ((cos(Az1) * cos(P1)) * (cos(Az2) * cos(P2))) + (sin(P1) * sin(P2))
-AB <- sqrt(((sin(Az1) * cos(P1))**2) + ((cos(Az1) * cos(P1))**2) + ((sin(P1))**2)) * sqrt(((sin(Az2) * cos(P2))**2) + ((cos(Az2) * cos(P2))**2) + ((sin(P2))**2))
-Beta <- acos(ab/AB)
-RF <- (tan(Beta/2)) / (Beta/2)
+ab <- ((sin(Az1) * cos(P1)) * (sin(Az2) * cos(P2))) + ((cos(Az1) * cos(P1)) * (cos(Az2) * cos(P2))) + (sin(P1) * sin(P2))   #Calculate dot product of each survey point pair
+AB <- sqrt(((sin(Az1) * cos(P1))**2) + ((cos(Az1) * cos(P1))**2) + ((sin(P1))**2)) * sqrt(((sin(Az2) * cos(P2))**2) + ((cos(Az2) * cos(P2))**2) + ((sin(P2))**2))   #Calculate the product of the vector lengths in each survey point pair
+Beta <- acos(ab/AB)   #Calculates the angle between the drillhole direction in each survey point pair
+RF <- (tan(Beta/2)) / (Beta/2)   #Calculates the ratio factor to multiply the below
 
+    #Calculate relative depths, northings and eastings at Dn location
 if (Dn <= D1[L] + (MD[L] / 2)) {
   Dp = (Dn - D1[L]) * (sin(P1[L])) * RF[L]
   Np = (Dn - D1[L]) * (cos(P1[L]) * cos(Az1[L])) * RF[L]
@@ -53,14 +56,15 @@ if (Dn <= D1[L] + (MD[L] / 2)) {
   Ep = (((Dn - D1[L] - (MD[L]/2)) * cos(P2[L]) * sin(Az2[L])) + ((MD[L]/2) * cos(P1[L]) * sin(Az1[L]))) * RF[L]
 }
 
-Depth <- (MD/2)*(sin(P1) + sin(P2))*RF
-North <- (MD/2)*((cos(P1)*cos(Az1)) + (cos(P2)*cos(Az2)))*RF
-East  <- (MD/2)*((cos(P1)*sin(Az1)) + (cos(P2)*sin(Az2)))*RF
+Depth <- (MD/2)*(sin(P1) + sin(P2))*RF #Difference in depths between survey points and multiply by ratio factor
+North <- (MD/2)*((cos(P1)*cos(Az1)) + (cos(P2)*cos(Az2)))*RF #Difference in northings between survey points and multiply by ratio factor
+East  <- (MD/2)*((cos(P1)*sin(Az1)) + (cos(P2)*sin(Az2)))*RF #Difference in eastings between survey points and multiply by ratio factor
 
-SumDepth <- round(cumsum(c(0, Depth[1:L-1], Dp)), digits = 2)
-SumNorth <- round(cumsum(c(0, North[1:L-1], Np)), digits = 2)
-SumEast <- round(cumsum(c(0, East[1:L-1], Ep)), digits = 2)
+SumDepth <- round(cumsum(c(0, Depth[1:L-1], Dp)), digits = 2) #Sums the depths and adds collar coordinate
+SumNorth <- round(cumsum(c(0, North[1:L-1], Np)), digits = 2) #Sums the northings and adds collar coordinate
+SumEast <- round(cumsum(c(0, East[1:L-1], Ep)), digits = 2) #Sums the eastings and adds collar coordinate
 
+    #Plot 3D graph
 scatter3Drgl(SumEast,
              SumNorth,
              SumDepth,
@@ -91,6 +95,7 @@ scatter3D(SumEast,
           nticks = 14,
           bty = "g")
 
+    #Show on graph the East, North, Depth, Azimuth and Plunge at Dn location
 legend("bottomleft",
        inset = c(0,0),
        legend = c(parse(text = sprintf('paste(East~(m),\': %s\')', SumEast[L+1])),
